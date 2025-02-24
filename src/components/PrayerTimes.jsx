@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import useObjectsStore from '../store/objectsStore';
+import {schedulePrayerAlarms} from '../services/sheduleAlarms';
 
 const PrayerTimes = () => {
   const {prayers, isAdmin, updatePrayerTime} = useObjectsStore();
@@ -83,9 +84,16 @@ const PrayerTimes = () => {
       prayers: updatedTimes,
     };
     try {
-      await updatePrayerTime(formattedPrayerTimes);
+      const updateResult = await updatePrayerTime(formattedPrayerTimes);
+      if (updateResult.success == true) {
+        await schedulePrayerAlarms(updateResult.prayers);
+      }
+      // if (updateResult == true) {
+      //   await schedulePrayerAlarms();
+      // }
     } catch (error) {
       console.error('Error updating prayer times:', error);
+      Alert;
     } finally {
       setLoading(false);
     }
@@ -136,25 +144,37 @@ const PrayerTimes = () => {
                       </TouchableOpacity>
 
                       {showPicker === prayer.prayerName && (
-                        <DateTimePicker
-                          value={
-                            new Date(
-                              jamatTimes[prayer.prayerName] || prayer.jamatTime,
-                            )
-                          }
-                          mode="time"
-                          is24Hour={false}
-                          display={
-                            Platform.OS === 'ios' ? 'spinner' : 'default'
-                          }
-                          onChange={(event, selectedTime) =>
-                            handleJamatTimeChange(
-                              prayer.prayerName,
-                              event,
-                              selectedTime,
-                            )
-                          }
-                        />
+                        <View style={{backgroundColor: 'red', padding: 10}}>
+                          <DateTimePicker
+                            style={{
+                              backgroundColor: 'red',
+                              borderRadius: 10,
+                              shadowColor: 'rgba(0, 0, 0, 0.2)',
+                              shadowOffset: {
+                                width: 0,
+                                height: 2,
+                              },
+                              shadowOpacity: 0.5,
+                              shadowRadius: 3,
+                            }}
+                            value={
+                              new Date(
+                                jamatTimes[prayer.prayerName] ||
+                                  prayer.jamatTime,
+                              )
+                            }
+                            mode="time"
+                            is24Hour={false}
+                            display="default"
+                            onChange={(event, selectedTime) =>
+                              handleJamatTimeChange(
+                                prayer.prayerName,
+                                event,
+                                selectedTime,
+                              )
+                            }
+                          />
+                        </View>
                       )}
                     </>
                   ) : (

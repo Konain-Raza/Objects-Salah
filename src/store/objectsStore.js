@@ -2,12 +2,13 @@ import {create} from 'zustand';
 import api from '../api/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {colorScheme} from 'nativewind';
+import {schedulePrayerAlarms} from '../services/sheduleAlarms';
 
 const useObjectsStore = create(set => ({
   prayers: async () => {
     await AsyncStorage.getItem('prayers');
   },
-  isAdmin: false,
+  isAdmin: true,
   isDarkMode: false,
 
   loadTheme: async () => {
@@ -46,26 +47,34 @@ const useObjectsStore = create(set => ({
     });
   },
 
-  checkJamatTime: async () => {
-    alert('hye');
-    console.log('✅ checkJamatTime function is running!');
-  },
-
   fetchPrayers: async () => {
     try {
-      const {data} = await api.get('/prayer');
-      set({prayers: data});
+      console.log("Fetching prayers from API...");
+      const { data } = await api.get('/prayer');
+      set({ prayers: data });
+  
       if (data.length > 0) {
         await AsyncStorage.setItem('prayers', JSON.stringify(data));
+        console.log("Prayers saved to AsyncStorage:", data);
+        return { success: true, prayers: data };
       }
     } catch (error) {
-      console.error('Failed to fetch prayers:', error);
+      console.error("Failed to fetch prayers from API:", error);
+  
+      // Try loading from AsyncStorage
       const storedPrayers = await AsyncStorage.getItem('prayers');
       if (storedPrayers) {
-        set({prayers: JSON.parse(storedPrayers)});
+        const parsedPrayers = JSON.parse(storedPrayers);
+        set({ prayers: parsedPrayers });
+  
+        console.log("Loaded prayers from AsyncStorage:", parsedPrayers);
+        return { success: true, prayers: parsedPrayers };
       }
     }
-  },
+  
+    console.log("No prayers found in API or AsyncStorage.");
+    return { success: false, prayers: [] }; // Ensures a valid return
+  },  
 
   updatePrayerTime: async updatedTimes => {
     try {
@@ -96,8 +105,16 @@ const useObjectsStore = create(set => ({
 
       // Await AsyncStorage update AFTER Zustand state update
       await AsyncStorage.setItem('prayers', JSON.stringify(newPrayers));
+      return {
+        success: true,
+        prayers: newPrayers,
+      };
     } catch (error) {
       console.error('Failed to update prayer times:', error);
+      alert('Failed to update prayer times ' + error.message);
+      return {
+        success: false,
+      };
     }
   },
 
