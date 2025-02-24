@@ -133,7 +133,7 @@ const PrayerTimes = () => {
                           );
                           setShowPicker(prayer.prayerName);
                         }}
-                        className="bg-gray-300 dark:bg-gray-700 py-2 px-3 rounded-md">
+                        className="bg-gray-300 dark:bg-gray-700 py-2 px-3 w-max rounded-md">
                         <Text className="text-lg font-gilroyBold text-black dark:text-white">
                           <Text className="text-lg font-gilroyBold text-gray-500 dark:text-gray-300">
                             {formatTime(
@@ -141,22 +141,10 @@ const PrayerTimes = () => {
                             )}
                           </Text>
                         </Text>
-                      </TouchableOpacity>
+                      </TouchableOpacity> 
 
                       {showPicker === prayer.prayerName && (
-                        <View style={{backgroundColor: 'red', padding: 10}}>
                           <DateTimePicker
-                            style={{
-                              backgroundColor: 'red',
-                              borderRadius: 10,
-                              shadowColor: 'rgba(0, 0, 0, 0.2)',
-                              shadowOffset: {
-                                width: 0,
-                                height: 2,
-                              },
-                              shadowOpacity: 0.5,
-                              shadowRadius: 3,
-                            }}
                             value={
                               new Date(
                                 jamatTimes[prayer.prayerName] ||
@@ -174,7 +162,6 @@ const PrayerTimes = () => {
                               )
                             }
                           />
-                        </View>
                       )}
                     </>
                   ) : (

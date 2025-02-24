@@ -8,7 +8,7 @@ const useObjectsStore = create(set => ({
   prayers: async () => {
     await AsyncStorage.getItem('prayers');
   },
-  isAdmin: true,
+  isAdmin: false,
   isDarkMode: false,
 
   loadTheme: async () => {

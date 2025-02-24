@@ -3,11 +3,23 @@ import notifee, {
   AndroidCategory,
   TriggerType,
   RepeatFrequency,
+  AuthorizationStatus,
 } from '@notifee/react-native';
-import {Platform} from 'react-native';
-
+import { Linking, Platform } from 'react-native';
+async function openAlarmSettings() {
+  if (Platform.OS === 'android' && Platform.Version >= 34) {
+    await Linking.openSettings();
+  }
+}
+async function requestAlarmPermission() {
+  const settings = await notifee.getNotificationSettings();
+  if (settings.authorizationStatus !== AuthorizationStatus.AUTHORIZED) {
+    await openAlarmSettings();
+  }
+}
 async function schedulePrayerAlarms(prayers) {
   console.log(`📅 Scheduling alarms for ${prayers.length} prayers`);
+  await requestAlarmPermission();
   await notifee.deleteChannel('Wuzu_Reminders');
   await notifee.deleteChannel('Jamat_Alarms');
   await notifee.cancelAllNotifications();
